@@ -133,6 +133,7 @@
                 Price: <?=$price_coins?> NESS coins and <?=$price_hours?> NESS Hours
                 To address: <?=$address?>
                 <center>
+                    <a href="https://ness-explorer.magnetosphere.net"> Verify on the blockchain</a>
                     <a class="btn btn-success" name="withdraw" href="/token.php">Go back</a>
                 </center>
             </div>
