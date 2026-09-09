@@ -9,7 +9,7 @@
 
     <style>
         body {
-            background: URL(/assets/img/faucet.jpg) no-repeat center center fixed;
+            background: URL(/assets/img/ness-green.jpg) no-repeat center center fixed;
             background-size: cover;
             background-color: black !important;
         }
@@ -90,15 +90,15 @@
 
             <div class="input-group">
                 <span class="input-group-text">Time token</span>
-                <input name="token" type="text" class="form-control" id="token" value="<?=$token?>">
-                <span class="input-group-text paste_button" data-id="token">Paste</span>
+                <input name="token" type="text" class="form-control pasted-token" id="token" value="<?=$token?>">
+                <span class="input-group-text paste_button" data-id="token" id="paste_button">CTRL-V</span>
             </div>
             <br/>
             <?php if (isset($withdraw) || (isset($check) && isset($err) && (true === $err))): ?>
                 <div class="input-group">
                     <span class="input-group-text">Address</span>
-                    <input name="address" type="text" class="form-control" id="address" value="<?=$address?>">
-                    <span class="input-group-text paste_button" data-id="address">Paste</span>
+                    <input name="address" type="text" class="form-control pasted-address" id="address" value="<?=$address?>">
+                    <span class="input-group-text paste_button" data-id="address" id="paste_button_address">CTRL-V</span>
                 </div>
             <?php endif; ?>
 
@@ -146,10 +146,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous">      </script>
     <script src="https://diriectordoc.github.io/jQlipboard/src/w0.3/jQlipboard.min.js"></script>
     <script>
-        $(".paste_button").click(function (e) {
-            $('#' + $(this).data('id')).focus();
-            $('#' + $($this).data('id')).paste();
+        document.addEventListener('DOMContentLoaded', function() {
+  const pasteButtonElement = document.querySelector('#paste_button');
+  const pasteButtonElementA = document.querySelector('#paste_button_address');
+  const pastedTokenElement = document.querySelector('#token');
+  const pastedAddressElement = document.querySelector('#address');
+
+  pasteButtonElement.addEventListener('click', function() {
+    navigator.clipboard.readText()
+      .then(function(clipboardText) {
+        // Check if the "pasted-token" input is empty
+        if (pastedTokenElement.value === '') {
+          // Paste the clipboard text into the "pasted-token" input
+          pastedTokenElement.value = clipboardText;
+        }
+      })
+      .catch(function(err) {
+        console.error('Failed to read clipboard contents:', err);
+      });
+  });
+
+  if (pasteButtonElementA)
+    pasteButtonElementA.pasteButtonElementA('click', function() {
+        navigator.clipboard.readText()
+        .then(function(clipboardText) {
+            // Check if the "pasted-token" input is empty
+            if (pastedAddressElement.value === '') {
+            // Paste the clipboard text into the "pasted-token" input
+            pastedAddressElement.value = clipboardText;
+            }
         })
+        .catch(function(err) {
+            console.error('Failed to read clipboard contents:', err);
+        });
+    });
+});
     </script>
   </body>
 </html>

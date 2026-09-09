@@ -1,6 +1,6 @@
 <?php
 if (file_exists(__DIR__ . '/../debug')) {
-    ini_set('display_errors', true);
+    ini_set('display_errors', false);
     error_reporting(E_ALL);
 }
 
