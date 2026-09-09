@@ -51,30 +51,18 @@ class Ness implements ICrypto {
       $responce = json_decode($responce, true);
       $token = $responce["csrf_token"];
 
-      $from_addr = array_map(function($addr) {
-        return "\"$addr\"";
-      }, $from_addr);
+      $body = json_encode([
+          'hours_selection' => ['type' => 'manual'],
+          'wallet_id' => $this->wallet_id,
+          'password' => $this->password,
+          'addresses' => array_values($from_addr),
+          'to' => [['address' => $to_addr, 'coins' => number_format($coins, 6, '.', ''), 'hours' => (string) $hours]],
+      ], JSON_THROW_ON_ERROR);
 
-      $from_addr = implode(',', $from_addr);
-  
-      $body = <<<BODY
-      {
-          "hours_selection": {
-              "type": "manual"
-          },
-          "wallet_id": "$this->wallet_id",
-          "password": "$this->password",
-          "addresses": [$from_addr],
-          "to": [{
-              "address": "$to_addr",  
-              "coins": "$coins",
-              "hours": "$hours"
-          }]
-      }
-BODY;
-  
       $ch = curl_init($this->prefix . $this->host . ":" . $this->port . "/api/v1/wallet/transaction");
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+      curl_setopt($ch, CURLOPT_TIMEOUT, 20);
       curl_setopt($ch, CURLOPT_POST, true);
       curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'X-CSRF-Token: '.$token));
       curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
@@ -95,22 +83,37 @@ BODY;
       }
   
       $json_output = json_decode($output, true);
-      $encoded_transaction = $json_output['encoded_transaction'];
+      $encoded_transaction = $json_output['encoded_transaction'] ?? '';
+      if (!is_string($encoded_transaction) || $encoded_transaction === '') {
+          throw new \RuntimeException('Wallet did not return a transaction');
+      }
+      $expectedTxid = $json_output['transaction']['txid'] ?? null;
   
-      $body = '{"rawtx": "' . $encoded_transaction . '"}';
+      $body = json_encode(['rawtx' => $encoded_transaction], JSON_THROW_ON_ERROR);
   
       // var_dump($output); 
       // die();
   
       $ch = curl_init($this->prefix . $this->host . ":" . $this->port . "/api/v1/injectTransaction");
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+      curl_setopt($ch, CURLOPT_TIMEOUT, 20);
       curl_setopt($ch, CURLOPT_POST, true);
       curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'X-CSRF-Token: '.$token));
       curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
       $output = curl_exec($ch);
   
   
-      return true;
+      $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      if ($output === false || $httpcode !== 200) {
+          throw new \RuntimeException('Transaction submission needs reconciliation');
+      }
+      $result = json_decode($output, true);
+      $txid = is_string($result) ? $result : ($result['txid'] ?? $expectedTxid);
+      if (!is_string($txid) || !preg_match('/^[a-f0-9]{64}$/iD', $txid)) {
+          throw new \RuntimeException('No transaction receipt returned');
+      }
+      return $txid;
     }
 
     public function priceCoins(int $seconds): float
@@ -130,12 +133,15 @@ BODY;
       }
 
       $addresses = $this->listAddresses();
+      if (!is_array($addresses) || !$addresses) {
+          throw new \RuntimeException('Wallet has no funded addresses');
+      }
       $addrs = [];
 
       foreach ($addresses as $addr => $record) {
         $addrs[] = $addr;
       }
       
-      $this->_pay($addrs, $to_addr, $this->priceCoins($seconds), $this->priceHours($seconds));
+      return $this->_pay($addrs, $to_addr, $this->priceCoins($seconds), $this->priceHours($seconds));
     }
 }

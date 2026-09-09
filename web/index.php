@@ -1,18 +1,6 @@
 <?php
-if (file_exists(__DIR__ . '/../debug')) {
-    ini_set('display_errors', false);
-    error_reporting(E_ALL);
-}
-
-require_once __DIR__ . '/../lib/Container.php';
-require_once __DIR__ . '/../lib/Sqlite.php';
-
-use \lib\Container;
-use \lib\Sqlite;
-
-$cryptor = Container::Cryptor();
-
-$token = $cryptor->show(time());
-$date = date("Y-m-d H:i:s");
-
-require __DIR__ . '/../templates/token.php';
+header('Cache-Control: no-store');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: no-referrer');
+header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+require __DIR__ . '/../templates/portal.php';

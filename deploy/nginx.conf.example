@@ -1,0 +1,20 @@
+# Place inside the HTTPS server block for your chosen public hostname.
+# Two PHP/Apache services: Faucet web/ on 8081; NVS-exchange web/ on 8082.
+# The public root redirects to the portal when FAUCET_PORTAL_URL=/faucet/.
+# Set EXCHANGE_API_PATH=/api.php on the Faucet service.
+# Set COOKIE_SECURE=1 on both PHP services behind this TLS terminator.
+client_max_body_size 16k;
+location /faucet/ {
+    proxy_pass http://127.0.0.1:8081/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 90s;
+    proxy_no_cache 1;
+}
+location / {
+    proxy_pass http://127.0.0.1:8082;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 90s;
+    proxy_no_cache 1;
+}
