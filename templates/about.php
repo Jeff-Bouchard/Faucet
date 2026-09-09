@@ -8,7 +8,7 @@
 
     <style>
         body {
-            background: URL(/assets/img/ness-green.jpg) no-repeat center center fixed;
+            background: URL(assets/img/ness-green.jpg) no-repeat center center fixed;
             background-size: cover;
             background-color: black !important;
         }
@@ -62,20 +62,20 @@
 
   <nav class="navbar navbar-expand-lg bg-body-tertiary" style="background-color: black !important;">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/">FAUCET</a>
+        <a class="navbar-brand" href="./">FAUCET</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
-            <a class="nav-link" href="/">Time token</a>
+            <a class="nav-link" href="./">Time token</a>
             </li>
             <li class="nav-item">
-            <a class="nav-link"  href="/token.php">Withdrawal $$$</a>
+            <a class="nav-link"  href="./#cashout">Withdrawal $$$</a>
             </li>
             <li class="nav-item">
-            <a class="nav-link active"  href="/about.php">About</a>
+            <a class="nav-link active"  href="about.php">About</a>
             </li>
         </ul>
         </div>
@@ -136,7 +136,7 @@
          
 
         <center>
-            <img src="/assets/img/neoguns.jpeg"/>
+            <img src="assets/img/neoguns.jpeg"/>
         </center>
 
     </div>

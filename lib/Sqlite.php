@@ -14,7 +14,8 @@ class Sqlite implements ITokenStorage {
             touch($db_filename);
         }
 
-        $this->connection = new \PDO("sqlite:" . $db_filename);
+        $this->connection = new \PDO("sqlite:" . $db_filename, null, null, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
+        $this->connection->exec("PRAGMA busy_timeout = 5000");
 
         $sql = <<<SQL
             CREATE TABLE IF NOT EXISTS `tokens` (

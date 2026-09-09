@@ -47,25 +47,18 @@ class TimeCryptor implements ICryptor {
 
     public function verify(string $token): bool
     {
-        if (empty($token)) {
-            throw new \Exception("Token is empty");
+        if (!preg_match('/^([1-9][0-9]{0,10})_([A-Za-z0-9+\/]{86}==)$/D', $token, $parts)) {
+            throw new EWrongTokenFormat("Token must be UNIXTIME_SIGNATURE", 1);
         }
-
-        $token = explode('_', $token);
-
-        if (2 !== count($token)) {
-            throw new EWrongTokenFormat("must be UNIXTIME_SIGNATURE", 1);
+        $unixtime = (int) $parts[1];
+        if ($unixtime > time()) {
+            throw new EWrongTokenFormat("Token timestamp is in the future", 1);
         }
-
-        $unixtime = $token[0];
+        $sig = base64_decode($parts[2], true);
+        if ($sig === false || strlen($sig) !== SODIUM_CRYPTO_SIGN_BYTES || base64_encode($sig) !== $parts[2]) {
+            throw new EWrongTokenFormat("Invalid signature encoding", 1);
+        }
         $string = date("s:i:H Y-m-d", $unixtime)." Privateness POT";
-
-        if (false === $string) {
-            throw new EWrongTokenFormat("error decoding UNIXTIME", 1);
-        }
-
-        $sig = base64_decode($token[1]);
-
         return sodium_crypto_sign_verify_detached($sig, $string, $this->verify);
     }
     
@@ -117,6 +110,9 @@ class TimeCryptor implements ICryptor {
         $token_dist = time() - $time;
 
         $min_dist = $this->getTokenDist($token);
+        if ($token_dist <= 0 || $min_dist <= 0) {
+            return 0;
+        }
 
         if($token_dist < $min_dist) {
             return $token_dist;

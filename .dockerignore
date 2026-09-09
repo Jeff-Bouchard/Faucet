@@ -1,0 +1,5 @@
+.git
+config/config.php
+data/*
+!data/dumy
+tests
